@@ -1,0 +1,1 @@
+Best if used with [Obsidian](https://obsidian.md/).
