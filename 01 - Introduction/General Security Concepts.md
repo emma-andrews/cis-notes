@@ -11,7 +11,7 @@
 		- buffer overflows
 		- arbitrary app flaws
 ### Multics
-- people claim [[cis/7 - Multics/Confinement|multics]] solved all these problems, it did not
+- people claim [[cis/07 - Multics/Confinement|multics]] solved all these problems, it did not
 	- still have same problems today and those in multics
 ### Roles
 - those who have a role in security and resolution of security issues

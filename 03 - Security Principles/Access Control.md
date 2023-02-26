@@ -15,13 +15,14 @@
 	- find the appropriate entry to determine if a specific subject has the right to access a specific object
 	- succinct descriptor for $\theta(|S||O|)$ entries
 example
+
 |           | File 1           | File 2    | Process 1                 | Process 2                 |
 | --------- | ---------------- | --------- | ------------------------- | ------------------------- |
 | Process 1 | read, write, own | read      | read, write, execute, own | write                     |
 | Process 2 | append           | read, own | read                      | read, write, execute, own |
-	- $S=$ $\{$Process1, Process2$\}$
-	- $O=$ $\{$File1, File2, Process1, Process2$\}$
-	- $R=$ $\{$read, write, execute, own, append$\}$
+- $S=$ $\{$Process1, Process2$\}$
+- $O=$ $\{$File1, File2, Process1, Process2$\}$
+- $R=$ $\{$read, write, execute, own, append$\}$
 ### Protection States
 - **protection state** - represented by current state of access matrix
 - **protection state operations** - modifies protection states
