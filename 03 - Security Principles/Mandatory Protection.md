@@ -1,4 +1,4 @@
-#access_control/protection_system #access_control/protection_state 
+#access_control/protection_system #access_control/protection_state #access_control/mps 
 ## Mandatory Protection System
 - mandatory protection system - protection system that can be modified only by trusted administration that consists of
 	- **mandatory protection state** - protection state is defined in terms of a set of *labels* associated with subjects and objects

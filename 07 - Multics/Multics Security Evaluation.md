@@ -1,0 +1,74 @@
+#multics #multics/protection_ring #multics/mls #reference_monitor 
+## Security-Related Features
+- cpu traps user-mode i/o and privileged instructions
+- user login requries password
+- user files protected from access by other users unless *shared voluntarily*
+- hierarchical administration and resource allocation
+- program execution done in processes with separate virtual address spaces
+- memory mapped CP registers for switching virtual address spaces
+- process address space descriptor segments define **access rights**
+- segment access permissions based on calling process
+- out of bounds accesses cause faults
+- **ring of execution** supported and checked by hardware
+	- honeywell 6180
+- 6180 cpu architecture allows cross-ring pointer checks
+- os components execute in ring 0
+- segment accessibility through [[Windows Access Control|acls]] and [[Protection Rings|ring brackets]]
+- changes to filesystem acl causes automatic recalculation/revocation of descriptor access segment
+- compiler output is *non-writeable code*
+- non-executable stacks for data segments and static data
+- type safety and runtime of string implementation tracks declared/allocated string size
+- call stack grows lower to higher to prevent stack smashing
+- private temp directory per process, prevents link squatting
+## Reference Monitor
+- **segment descriptor word (SDW)** - used by a process to access a segment
+	- directory stores a mapping between segments and secrecy level
+	- each segment has a *ring bracket specification*
+		- copied into sdw
+	- each segment has an *acl*
+		- authorized operations in read/write/execute bits
+- **mediation**
+	- security-sensitive operations on segments
+	- all objects are accessed via a *named hierarchy* of segments
+	- predates file system hierarchies
+- **tamperproofing**
+	- reference monitor is part of the *kernel ring*
+	- minimize dependency on software outside kernel
+- **verifiability**
+	- lots of code
+	- [[Multilevel Security|mls]] for secrecy and rings for integrity
+		- not mandatory
+- [[Multics|multics]] fails to meet [[Reference Monitor Concept|reference monitor]] concept guarantees, but is that a bad thing?
+	- still possible to configure *integrity*
+		- if [[Enforcement|TCB]] cannot be compromised
+		- lot of code and complex concepts
+			- we can handle it! haha no
+## Vulnerability Analysis
+- Schell and Karger evaluated multics system security in 1972-1973
+	- Schell - security kernel architecture, GEMSOS
+	- Karger - capability systems, covert channels, virtual machine monitors
+- **criteria** - multics is "securable"
+	- based on *security descriptor mediation*
+	- ring protection
+	- look for multics vulnerabilities
+	- is reference monitor *practical* for multics?
+	- identify necessary security enhancements
+	- determine scope of a *certification effort*
+- **master mode**
+	- procedures used in ring 0 to run privileged functions
+	- *"pseudo-operation code"* at location 0 in ring 0
+		- starts at a well-known location
+	- test entry point for *validity*
+		- only run known function from known locations
+- avoid trying to run privileged code that may be impacted by users
+- **findings**
+	- design is sound
+	- implementation is ad hoc
+	- vulnerabilities in hardware, software, and procedures
+- **conditions** findings found under
+	- half of the time, find one vulnerability per area
+		- not exhaustive or systematic
+	- use system in standard way
+	- extract information without detection
+- change access fields in sdw, add trapdoor, get passwd, etc.
+### Hardware Vulnerabilities

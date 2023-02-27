@@ -1,0 +1,55 @@
+#multics #multics/mls #access_control/mps  
+## Overview
+- **secrecy** for [[Multics|multics]]
+- **multilevel security system** - tags all objects and subjects with security tags
+	- classifies them in terms of sensitivity and access level
+- formulate access policy based on these levels
+- can add other dimensions called **categories** that horizontally partition the rights space
+	- similar to [[General Security Concepts|roles]]
+## Example - Department of Defense Policy
+- **lattice model** - uses multilevel security to define policy
+- levels
+	- unclassified < confidential < secret < top secret
+- **categories** represented as an *unbounded set*
+	- nuclear, intelligence, cryptography
+- levels are also used for physical documents
+- **confidential** - unauthorized disclosure could reasonably result in damage to national security
+- **secret** - unauthorized disclosure could reasonably result in serious damage to national security
+- **top secret** - unauthorized disclosure could reasonably result in exceptionally grave famage to national security
+- **sensitive compartmented information (SCI)** - special category that provides exceptionally sensitive access
+	- requires numerous security clearance briefs during employment and a lifetime binding NDA
+- all subjects are assigned **clearance levels** and **compartments**
+- all objects are assigned an **access class**
+- access is allowed if
+	- subject's clearance level is greater than or equal to the object's sensitivity level
+	- subject's categories are a subset of the object's categories
+		- *read-down property
+- **formal definitions**
+	- *dominance relationship* - ability to access a resource because of greater level of rights
+		- if $A$ can access $C$ then it dominates
+		- $(A,C)dom(A',C')<=>A'\geq A \cap C' \subseteq C$
+- **Hasse diagram** - represents *security lattices*
+	- represents a finite poset as a directed graph of its transitive reduction
+		- minimum representation of edges
+- **Bell-LaPadula (BLP) Model** - confidentiality multilevel security model that enforces
+	- *simple security property* - a subject at a specific classification level cannot read data at a higher classification level
+		- **no read up**
+	- *star/confinement property* - states that a subject at a specific classification level cannot write data at a lower classification level
+		- **no write down**
+## Secrecy
+- prevent **leakage**
+	- e.g. top-secret process should not have a Trojan horse
+	- *trojan horse* - program that performs a useful function and a malicious function
+	- with standard protection mechanisms, trojan horse can leak top-secret data to a secret process
+	- with mls, trojan horse *cannot*
+## As Mandatory Protection System
+- is mls a [[Mandatory Protection|mps]]?
+- **protection state**
+	- fixed labels
+	- defined and fixed information flows
+- **labeling state**
+	- subjects login at a label
+	- objects are labeled at creation according to mls rules
+- **transition state**
+	- no transitions of secrecy
+		- *covert channels*
