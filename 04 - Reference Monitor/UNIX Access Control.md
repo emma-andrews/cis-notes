@@ -1,4 +1,4 @@
-#access_control #access_control/unix #access_control/access_matrix 
+#access_control #access_control/unix #access_control/access_matrix #vulnerabilities/confused_deputy 
 ## UNIX Access Control
 - all objects are files
 - classical protection system
@@ -7,7 +7,7 @@
 - practical model for end users
 	- involves some policy specification
 - **mode bits** - first column in `ls -al`
-	- defines read, write, and execute for each user group
+	- defines read, write, and execute for user, group, and other
 	- extra flag if file is directory
 - example access matrix
 	- suppose private key file for subject $J$ is object $O_1$

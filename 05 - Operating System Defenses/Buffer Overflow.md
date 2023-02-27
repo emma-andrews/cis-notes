@@ -1,0 +1,57 @@
+#vulnerabilities/overflow #vulnerabilities/morris #vulnerabilities/stackguard 
+## Attack Description
+- **buffer overflows** are very common
+	- [[Vulnerabilities|Morris worm]] was the first to exploit
+- buffer extends beyond what was allocated for it in memory
+	- easy to do if function has no range checking
+- if **stack pointer** points to overwritten code from the buffer, it will execute it
+	- the attack code runs in the stack
+	- to determine the location of the return call, guess the position of stack when the function is called
+- unsafe c lib functions
+	- `strcopy`
+	- `strcat`
+	- `gets`
+	- `scanf`
+	- etc
+- so-called "safe" versions are misleading
+	- `strncopy` - can leave buffer unterminated (no `\0`), encourage off by 1 bugs
+	- `strncat` - encourage *off by 1 bugs*, overwriting the least significant bit of stack frame pointer
+- **stack smashing attack** - override return address in stack activation record by *overflowing* a local buffer variable
+- **function pointers** - overflowing buffer will *override function pointer*
+- **longjmp buffers** - `setjmp` saves registers to the stack, `longjmp` restores registers
+	- register saving and restoring occurs on *context switches*
+### Required to Exploit
+- understanding of c functions and the stack
+- familiarity with machine code
+- understanding of how system calls are made
+- know what cpu and os the target is running
+	- little vs big endian
+	- stack frame structure
+	- stack growth direction
+## StackGuard
+- **stackguard** - runtime tests for *stack integrity*
+	- embed *canaries* in stack frames
+	- verify integrity prior to *funtion return*
+- **random canary**
+	- choose random string at program startup
+	- insert canary string into every stack frame
+	- verify canary before returning from the function
+	- attacker must learn the current random string to corrupt random canary
+- **terminator canary**
+	- make the canary a terminating character
+		- e.g. `\0, \n, LF, EOF`
+	- string functions will not copy beyond terminator
+	- attacker cannot use string function to corrupt the stack
+- implemented as a gcc patch, have to recompile the program
+- had minimal impact on performance
+	- 8% for apache
+- cannot protect against overflows in automatically allocated structures that overflow into function pointers
+- **heapguard?**
+	- cannot work because the heap is dynamically allocated, cannot predict its structure in memory
+		- can also be *fragmented* across memory unlike the stack
+## Non-Executable Memory
+- **W XOR X** (W^X) - page can be either written or executed but *not both*
+	- prevent overflow code execution by marking stack and heap segments as **non-executable**
+	- limitations
+		- some applications do need an executable heap, like just in time (JIT) compilers
+		- does not protect against [[Return-oriented Programming|return-oriented programming]] attacks

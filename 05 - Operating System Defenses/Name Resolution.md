@@ -1,0 +1,52 @@
+#vulnerabilities/links #vulnerabilities/tocttou  
+## Links - Name Resolution Attack
+- multiple names for a single **inode**
+- set a **link** overwriting a valid link to an invalid one
+- programs need to be aware of which files they are using
+- need to use the right open system call to prevent the open system call from following a link
+	- `open(file, O_NOFOLLOW, mode)`
+## Name Resolution Defenses
+- system call APIs have extended for programmers to prevent name resolution attacks
+### Open
+- `open` - turns a name into a **file descriptor**
+	- *flags* for limiting resources access
+	- `O_NOFOLLOW` - if pathname is a *symbolic link*, then `open` fails
+		- use to prevent retrieval of a resource using a symbolic link
+		- sometimes you do want to follow an untrusted link to an untrusted file
+	- `O_EXCL` - if this flag is specified in conjunction with `O_CREAT` and pathname already exists, then `open` fails
+- programmer uses **flags** to *constrain* resources retrieved
+	- prevents **file squatting**
+	- use to check whether a file being created *already exists*
+	- sometimes it is ok for some files to already exist
+		- given that no adversary could have tampered with them
+### Check File Metadata
+- check properties of the file
+- `stat` - stats the file pointed to by path and fills in buf
+	- `struct stat` fields
+		- device id that contains the file
+		- inode number
+		- protection mode
+		- number of hard links
+		- user id of owner
+		- group id of owner
+		- device id if special file
+		- total size in bytes
+		- blocksize for file i/o
+		- number of blocks allocated
+		- time of last access
+		- time of last modification
+		- time of last status change
+- `lstat` - identical to `stat`, except that if path is a *symbolic link*, then the link itself is stated, not the file that it refers to
+	- enables a programmer to see that a pathname is really a link
+- `fstat` - identical to `stat`, except that the file to be stated is specified by the file descriptor fd
+	- enables a programmer to check the metadata of the file that was really retrieved
+- using to prevent **link traversal attacks**
+	- e.g. [[Vulnerabilities|TOCTTOU]] attacks
+	- could check if a it is a link before opening
+	- if not, then open file
+	- could check that the file descriptor is file expected
+	- **problems** with these approaches
+		- *expensive* - requires many system calls, these system calls are way more expensive than just `open`
+		- *TOCTTOU* - make adversary win k races of type LAOF - sLaAsOF
+			- s - secret file (target)
+			- a - accessible file (one that is legal for the adversary)
