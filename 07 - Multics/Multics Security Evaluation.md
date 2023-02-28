@@ -72,3 +72,124 @@
 	- extract information without detection
 - change access fields in sdw, add trapdoor, get passwd, etc.
 ### Hardware Vulnerabilities
+- run system for a long time
+	- did not crash, but found one *undocumented instruction* and one vulnerability
+- **indirect addressing**
+	- address provided includes the actual address to use
+	- mechanism only checked the first address
+- **result** - bypass *access checking*
+	- complete mediation
+- **attack details**
+	- execute instruction with read-execute access in first segment
+	- object instruction in word 0 of second segment with read permission
+	- word for reading or writing in a third segment
+	- third segment must already be in the page table
+	- access checks for third segment are ignored
+		- do whatever to contents on this third segment
+- motivate need for **correctness** to be verified
+### Software Vulnerabilities
+- **master mode vulnerability**
+	- run privileged code with ring 0 permissions
+	- requires a *trap* to ring 0
+	- expensive as some privileged operations occur frequently
+		- e.g. page faults
+	- **proposed solution**
+		- handle a page fault without transition
+		- justification - it has a restricted interface
+		- but, inputs are not checked
+	- need to be careful regarding the security impact of **performance improvements**
+	- what went wrong?
+		- moved master mode signaler to run in the same ring as the caller
+		- signaler needs access to a privileged register
+		- code should be audited, which was not done
+	- **performing attack**
+		- specify 0 to $n-1$ entry points for master mode
+		- *out of bounds* - transfers to mxerror
+		- mxerror believes that a register points to a signaler, but register can be modified by user
+			- still in the user's ring
+- **argument validation**
+	- check only *direct args*
+	- crash system from user space arbitrarily
+	- assume that a register always had a value with the same semantics
+		- this was changed, but not all code was updated to reflect it
+		- could then plant a *trapdoor* until next reboot
+	- others and carry over to new hardware
+- **procedural vulnerabilities**
+	- tamper with the configuration of the *reference validation mechanism* and its dependencies
+	- variety of attacks
+		- patch utility
+		- forge identity
+		- modify password file
+		- hide existence of malware
+## Final Report
+- resultant system had **two major problems**
+	- *complex* - 54k lines of code modified by hundreds of programmers
+		- compared to today's system,
+	- security mechanisms were *ad hoc*
+		- multiple mechanisms
+		- some overlapping semantics
+- security kernel design is possible though
+	- multics had good design, implementation just fell apart
+## Issues
+- main goals
+	- simplify the multics supervisor
+	- simplify security model
+- is it **feasible** to
+	- *audit* a kernel implementation?
+	- make a *usable* security model?
+	- make security with *acceptable performance*?
+- still working on these today in modern oses
+## Project Plan
+- use mls - bell-la padula model - for security
+- parallel efforts of design and implementation for the new supervisor
+	- enable audited implementation
+	- use language that enables verification for kernel implementation
+## Results
+- explore structure and dependencies
+	- layered architecture vs interdependent components
+- reduce size
+	- many things in supervisor do not need privilege
+	- *privilege separation* is hard to do automatically
+	- were able to reduce the supervisor to 28k lines of code (from 54k)
+- performance
+	- memory management did not have much change
+### Evaluation Criteria
+- **mediation** - does interface mediate correctly?
+	- mediates on object references
+	- *but*, some indirection via directory for mls labels
+- **mediation** - on all resources?
+	- all objects are segments
+	- *but*, this can change if network is introduced
+- **mediation** - verifiably?
+	- working on it smile
+	- some use complex formats, so verification is required
+- **tamperproof** - is reference monitor protected?
+	- in supervisor with *trusted* code
+	- *but*, can access via gates and master mode in a controlled manner (for the most part)
+- **tamperproof** - is system tcb protected?
+	- managed by brackets
+	- *but*, the brackets can be modified and master mode code can be moved out of ring 0
+- **verifiable** - is tcb code base correct?
+	- trying to verify
+	- *but*, did not verify at all, was partially done at a later time
+- **verifiable** - does the protection system enforce the system's security goals?
+	- not an mps, so no
+## What did Multics do right then?
+- no **buffer overflows**
+	- happened because of language chosen
+	- hardware support through *execution bits* to ensure data cannot be directly accessed
+	- segmented virtual addresses
+- **size** - 628k for ring 0 supervisor
+	- SELinux example *policy only* is 1767k
+- **secure auditing**
+	- can be bypassed
+	- motivates recent work in securing *data provenance*
+	- is there a better way to assure the integrity of audits and collected data?
+## Conclusion
+- multics originated the development of a **secure operating system**
+	- real attempts were made to achieve reference monitor guarantees and provide a mps
+- *however*, it is not easy to satisfy reference monitor guarantees, even when you try
+	- especially difficult if the system maintainers are not trying
+- if you are not trying to enforce reference monitor guarantees, you will not have anything close to it
+	- e.g. linux, windows
+- systems that are weaker than multics are considered for use in environments of what even multics could deliver without restructuring around a security kernel
