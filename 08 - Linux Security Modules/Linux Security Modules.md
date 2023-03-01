@@ -1,0 +1,54 @@
+#lsm #access_control/rbac #reference_monitor 
+## Creation
+- many solutions for providing secrecy and integrity
+- linux needed to adopt one
+- **solution** - add another layer of abstraction
+	- *before* - access control models implemented as kernel patches
+	- *after* - access control models implemented as loadable kernel modules
+### Requirements
+- need to **balance** between kernel developer and security developer requirements
+- **unify functional needs** of as many security projects as possible while minimizing impact on the kernel
+	- make generic
+	- conceptually simple
+	- minimally invasive
+	- efficient
+	- support POSIX capabilities
+	- support implementation of [[Role Based Access Control|access control models]] as loadable kernel modules
+### Tasks
+- modifications to the kernel
+	- opaque security fields added to certain kernel structures
+	- security hook function calls inserted at various points with the kernel code
+	- a generic security system call was added
+	- function to allow modules to register and unregister as security modules
+	- move capabilities log into an optional security module
+- **security fields** - enables security modules to associate information to *kernel objects*
+	- implemented as `void*` pointers (yikes)
+	- completely managed by security modules
+	- if an object is created before the security module is loaded, I think the struct is just updated on the security field (or its populated when the file is made)
+- **hooks** - function calls that can be overridden by security modules to manage *security fields* and *mediate access* to kernel objects
+	- called via function pointers stored in `security->ops` table
+	- primarily *"restrictive"*
+	- check the security of the calling function, if able to access then the security sensitive operation will be performed
+	- difference from discretionary controls
+		- more object types
+		- finer-grained operations
+		- system labeling, not dependent on user
+		- authorization and policy defined by module, not by the kernel
+- **posix capabilities** - moved into optional modules
+	- capabilities allow *partitioning* traditional superuser privileges
+	- *permissive*
+	- capable interface and task_strust bit vector left as is
+## LSM Analysis
+- lsm is mainly responsible for **complete mediation**
+	- ad hoc
+- **analysis approach**
+	- objects of particular types can be in two states, unchecked or checked
+	- all objects in a controlled operation must be checked
+		- structure member access on objects
+	- exploited through tocttou
+	- build *runtime kernel monitor* to log structure member accesses
+		- able to find missing hooks
+	- automate looking at functions behind pointers to infer security specification
+- overall, lsm provides a **[[Reference Monitor Concept|reference monitor]]** interface for linux
+	- base interface gives *complete mediation*
+	- need module and infrastructure to achieve *tamperproofing* and *verifiability*

@@ -23,7 +23,7 @@
 - **gate** - mediates access
 	- *special memory address* where lower-privilege code can call higher-privilege functions or code
 	- enables the os to control where applications call *privileged functionality*
-	- in modern oses, equivalent to (?) permissions (????)
+	- in modern oses, equivalent to system calls
 #### Brackets
 - different procedure segments with
 	- **call brackets** $(c_{1},c_{2})$ where $c_{1}\leq c_{2}$
