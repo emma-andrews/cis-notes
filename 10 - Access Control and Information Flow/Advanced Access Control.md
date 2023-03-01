@@ -1,0 +1,65 @@
+#access_control #reference_monitor #access_control/acl #access_control/access_matrix #confinement 
+## Overview
+- review - [[Reference Monitor Concept|reference monitor components]]
+	- interface
+		- **mediation** - where to make access control decisions
+		- **authorization** - which access control decisions to make
+		- [[Linux Security Modules|lsm]] interface
+	- **decision function** - compute decision based on request and policy
+		- e.g. selinux, lids, dte, etc
+	- **policy** - need a way to represent access control policy
+	- main mechanism issue - find a mechanism to enable *verification* that policy achieves function and meets security guarantees
+- **[[Access Control|access control]]** - determine whether a principal can perform a *requested operation*
+	- *principal* - user, process, etc
+	- *operation* - read, write, etc
+	- *object* - file, tuple, etc
+	- Lampson defined the access matrix and its two interpretations, ACLs and capabilities
+- **access control policy** - specification for an *access decision function*
+	- aims to achieve
+		- *availability* - permit the principal's function
+		- *integrity and confidentiality* - ensure security properties are met
+			- limit to **[[SELinux|least privilege]]**
+			- prevent system integrity
+			- prevent [[Confinement|unauthorized leakage]]
+			- aka **constraints**
+		- *simplicity* - enable administration of a changeable system
+### "Simple" Example
+- prof alice manages access to course objects
+	- assign access to individual - principal Bob
+	- assign access to aggregate - course-students
+	- associate access to relation - students(course)
+	- assign students to project groups - student(course, project, group)
+- prof alice wants certain guarantees
+	- students cannot modify objects written by prof alice
+	- students cannot read/modify objects of other groups
+- prof alice must be able to maintain access policy
+	- ensure that individual rights do not violate guarantees
+	- *however*, exceptions are possible
+		- students may distribute their results from previous assignments for an exam
+### Difficulty of Access Control
+- access control requirements are **domain-specific**
+	- generic approached *over-generalize*
+- access control requirements can change, even for mac policies
+- **safety problem** - can only know what is leaked *right now*
+	- determine if an unauthorized permission is leaked given:
+		- an initial set of permissions
+		- an access control system, mainly administrative operations
+	- for a traditional approach, the safety problem is *undecidable*
+		- access matrix model with multi-operational commands
+		- main culprit is *creating* object/subject with own rights
+		- prove reduction of a Turing machine to the multi-operational access matrix system
+	- **result**
+		- *safe*, but limited models
+			- take-grant, schematic protection model, typed access matrix model
+		- further support for models in which the constraints are *implicit* in the model
+			- e.g. lattice models
+		- check *safety* on each policy change - constraint approach of [[Role Based Access Control|rbac]]
+- access if **fail-safe**, but constraints are not
+	- constraints must restrict all future states
+- comparison to other computer science problems
+	- **processor design** - hard but you can construct one, fixed, testable design
+	- **network protocol design**
+		- *tcp* has a small number of control parameters necessary to manage all reasonable options within a layered architecture
+		- constraints like ddos are ad hoc
+	- **operating systems** - lots of heuristic algorithms to computationally hard problems, but very little end user configuration of policy
+		- policy configuration done by os distributors
