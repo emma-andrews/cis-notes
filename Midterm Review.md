@@ -1,0 +1,43 @@
+- trusted vs trustworthy
+- compromise of any components is a violation of sys sec
+- ref monitor!!! class can like never answer ref monitor questions so he keeps hinting at it being on exam
+- access matrix
+- discretionary vs mandatory access control
+	- mandatory - can only be changed by a trusted admin, think of terms in labels instead of subjects + objects
+		- labels assigned by security matrix
+		- immutable access matrix
+			- benefit - can reason about future state of sys
+				- what safety problem is all abt - will i be in a safe state in the future
+- access control lists
+	- in both windows + linux
+- file squatting, tmp attacks
+- access races
+- buffer overflows - can happen in stack or heap
+	- stackguard, why it is hard to design heapguard
+	- why these defenses arent effective vs rop
+	- rop is based on returns in libraries
+		- control flow integrity as way of dealing with rop
+- confinement - introduced covert channels
+	- storage + timing channels
+- multics
+	- access calls with rings, procedures in segments
+	- mls at software level
+	- tradeoff usability and performance with security
+		- led to master mode vuln
+- rbac - assign roles to users
+- lsm - try to get security guarantees from multics in linux
+	- policy determines what to enforce
+	- selinux combo of kernel and user level processes and policies
+- mls - blp conf model
+	- not just abt levels, but also categories
+	- should know reading and writing, what goes up and down
+	- integrity of blp
+- noninterference - should not know when high level op is doing anything
+- clark wilson integrity - most systems do not need lattice models since they are not flexible enough for practical use
+	- ensure high integrity components only communicate with other high integrity components
+- "good to know for exam"
+	- reasonable idea of all concepts
+	- questions today about what makes sys integrity not good for runtime integrity
+	- apply knowledge of concepts and assess pros and cons of approaches
+	- how concepts work together
+	- 😢

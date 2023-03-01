@@ -1,3 +1,4 @@
+note: not in midterm overview of concepts, may not need to know
 ## Mitigating Code Execution
 - developed for Windows
 - preventing arbitrary **code generation**
