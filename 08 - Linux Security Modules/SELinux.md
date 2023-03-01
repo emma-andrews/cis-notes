@@ -1,3 +1,123 @@
-#reference_monitor #lsm 
+#reference_monitor #lsm #enforcement/tcb #access_control/mps 
 ## Overview
 - **SELinux** - comprehensive *reference validation mechanism* aiming at [[Reference Monitor Concept|reference monitor]] guarantees
+- motivated by [[Security Kernels|security kernel]] design philosophy
+	- made practical considerations though
+- **philosophy** - had a flawed assumption
+	- security can be provided in application space without proper security features in the os (reference monitor)
+	- which means, can't build a secure system without a reference monitor
+		- secure os also needs an entire ecosystem
+## Tamperproofing
+- need to protect the kernel and the [[Enforcement|tcb]]
+- how do we *define* tamperproofing?
+- **design policy**
+	- do not believe that *classical integrity* is achievable in practice
+		- there are too many exceptions
+		- commercial systems will not accept constraints of classical integrity
+	- should focus on providing *comprehensive control* of access aiming for integrity via *least privilege*
+		- integrity of system components
+		- all user processes run with the same label
+		- least privilege restricts access more than is expected, causing failures
+			- it also does not enforce any formal secrecy or integrity goals, so vulnerabilities still possible
+## Policy Model
+- a subject or process's access is determined by its
+	- **user**
+		- an *authenticated* entity
+		- assigned to a set of roles, but only one role active at a time
+	- **role**
+		- identifies a set of *types* that a process can attain
+	- **type (label)**
+		- specific subject label for the process now
+		- determines *permissions* based on the [[Mandatory Protection|mps]]
+- **security context** - owned by both subjects and objects
+	- **subjects** - context is a combination of its user, role, and type
+	- **objects** - context is determined by its type
+		- use placeholders for user and role
+	- has standard **mps protection state**
+		- accessibility of a subject to an object are dependent upon each's type and authorized operations
+- expressed as **mps**
+	- protection state, labeling state, and transition state are all defined explicitly
+		- 10k+ rules necessary for standard linux distro
+		- has over 1k type labels
+		- *ignoring* user processes
+			- we do *confine* them relative to the system
+### Example Policy
+- policy is designed for each *target application*
+	- definer has a threat model in mind
+	- definer specifies policy against that model
+	- definer and others test that the application runs given that policy
+- policy for the system
+	- aggregate of application policies
+	- no coherent threat model
+	- application interactions not examined in detail
+## SELinux in Action
+- **configuring a program**
+	- goal is least privilege
+	- find the permissions that a program may need
+	- configure the policy for these permissions
+### Configuring Policy
+- **generate** policy file
+- **install** policy
+- **authorize** service
+- **finish** - restart services, update policy to collect denied permissions, etc
+### Deployment
+- many services need to be aware of selinux
+- have to install policy into the kernel
+- have to manage all of the policy
+- will the policy do what it is intended to do
+- **user space services** - makes security decisions
+	- authentication, access control, and configuration
+	- many services need to be aware of selinux to enable usability
+	- **authentication** - create a subject context on a user login
+		- set an selinux context and a user id for the generated shell
+		- **pluggable authentication modules** - used by various authentication services to create a subject context
+	- **access control** - many services are shared among clients of different security
+		- potential problem - service may leak one client's secret to another
+		- to resolve, use selinux, add support for it to the service
+	- **configuration**
+		- have to get policy constructed and loaded into the kernel, without allowing an attacker to control the system policy
+			- policy can change *dynamically*
+		- **composing policies**
+			- policy is modular
+			- policy management system composes the policy from the modules
+				- links a module to previous definitions and loads them
+- significant configuration effort to deploy selinux system
+## Threats
+### Remote Attackers
+- if the threat is remote attackers, how do we design policies?
+- motivation for AppArmor over SELinux
+- solution/goal - keep a compromised daemon from comprising the system
+	- however, some daemons must be trusted e.g. ssh
+	- results - both have attack paths from network daemons
+### System Integrity
+- need to design policies to protect the system's [[Enforcement|tcb]]
+- goal - find a tcb from the processes in the trust model
+- however, many policy rules allow interaction of trusted and untrusted processes
+- result - develop a methodology for customizing a policy
+	- some leaps of faith results
+## Classification
+- need to classify **integrity violations** based on *possible resolutions*
+- **type classifications**
+	- *should be trusted* - upgrade low subject type to trusted
+	- *troublemaker* - exclude low subject type
+	- *not possible to trust* - downgrade trusted subject type
+	- *troublemaker objects* - exclude conflicting object types
+- **permission classifications**
+	- *filtering permissions* - sanitize permutation use
+	- *troublemaker perms* - deny access to conflicting patterns
+	- *major surgery* - modify policy
+- should we trust the troublemaker?
+	- exclude or trust writeup subjects that conflict with may read-down permissions
+	- downgrade read-down subjects that conflict with many writeup perms
+- **filter** read down permissions
+	- read/write integrity vs read-only integrity
+	- small number of read-down subjects (FIFOs)
+	- assess permission type and use (sockets)
+- **exclude** conflicting writeup objects
+	- writeup permission that impacts several read down permissions
+	- remove excluded subject type permissions
+- **deny** conflicting writeup permissions
+	- find conflicting permission between read down and writeup
+	- broad read-downs
+	- test if it can be denied
+- when all else fails, change the policy
