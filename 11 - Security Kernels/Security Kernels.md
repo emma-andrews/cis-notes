@@ -1,0 +1,50 @@
+## Overview
+- **security kernels** - the hardware and software necessary to realize the [[Reference Monitor Concept|reference monitor abstraction]]
+	- includes hardware mechs leveraged by [[Enforcement|tcb]] to achieve the reference monitor guarantees
+	- focus on *"verifiable" security*
+		- compared to unix's focus on generality and performance
+- **mitre project** - first prototype security kernel in 1974
+	- os in 20 subroutines
+	- less than 1k lines of code
+	- system to manage physical resources
+	- advantage of approach - easy to verify because there wasn't much to it
+## Goals
+- implement a **specific security policy**
+- define a **verifiable protection behavior** of the system as a while
+- must be show to be **faithful** to the security model's design
+- these equate to a means of implementing a reference monitor
+- **complete mediation**
+	- all access to info must be mediated by the kernel
+	- sounds reasonable *but*
+		- objects are not just files, memory, or i/o buffers
+		- file names have info
+		- directories include info about files
+		- status registers, dynamic data maintained
+			- could cause *covert channels*
+	- hardware has to ensure program cannot bypass **kernel access control**
+- **tamperproof**
+	- is isolation the same goal?
+	- seems intuitive, but needs hardware and software to enforce
+	- primary hardware feature is *memory management*
+		- same mech used to isolate processes from each other
+	- user programs cannot execute privileged kernel instructions
+		- requires domain control, e.g. [[Protection Rings|rings of protection]]
+	- making the kernel code sit in hardware rom has benefits and drawbacks
+- **verifiability**
+	- hardest goal to achieve
+	- area of intense focus
+		- verify that the implementation is faithful to the model
+		- verify that the model supports a specific security policy
+	- there are formal limits of verification
+- **verification design**
+	- *software engineering* - structured design, modularity, info hiding, layering, abstraction, higher-order languages
+	- simplicity of kernel interface functions
+	- minimize kernel by excluding non-security functions
+- **verification techniques**
+	- code inspection
+	- testing
+	- formal specification and verification
+- **formal verification** - mathematical proof of the design
+	- relate bits in memory to *abstract model*
+	- use formal specification language, proofs, automated tools, etc
+	- is it really doable at scale?

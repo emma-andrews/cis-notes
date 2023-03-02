@@ -1,0 +1,103 @@
+## Details
+- honeywell level 6 minicomputer enhanced with processor instructions
+	- bus connected units for cpus, i/o controllers, and memory
+	- hardware-based secure processor module (spm)
+- special-purpose **kernel software**
+- **stop** - scomp trusted operating system
+- **skip** - scomp kernel interface package
+- **scomp system architecture**
+	- hardware
+	- **tcb**
+		- stop - [[Security Kernels|security kernel]] - ring 0 trusted
+		- stop - trusted software - ring 1 trusted
+		- skip - trusted functions - ring 2 trusted
+	- applications
+		- skip - libraries - ring 3 untrusted
+## vs Multics
+- like [[Multics|multics]]
+	- **access control** via *segments*
+		- memory segments and i/o segments
+		- files defined at a higher level
+	- **security goals**
+		- *secrecy* - implemented with [[Multilevel Security|mls]]
+		- *integrity* - [[Protection Rings|ring brackets]]
+- unlike multics
+	- **mediation** on segments
+		- all access control and protection rings implemented in hardware (mmu)
+	- **formal verification**
+		- verify that the formal model *enforces* mls policy
+		- trusted software outside the kernel verified using a *procedural specification*
+		- separate the kernel from *system api functions* - different protection rings used
+## Hardware
+- **security protection module (spm)** - mediates all accesses to i/o controllers and memory by mediating the i/o bus
+	- translates virtual addresses to physical segment addresses for authorization
+	- interspersed among system elements
+		- mediation for cpu references to memory, cpu references to i/o, i/o device references to memory
+- i/o device drivers can run in user-space
+	- does not work in a normal os, but does in scomp
+		- does not work in modern os because of kernel checks
+	- works because the kernel builds to i/o descriptor and the hardware authorizes the i/o operation
+	- performance and security advantages
+		- once access is mediated, the user process may interact with the devices directly, removing the need for kernel processing and context switches
+		- drivers are source for many kernel errors, so removing them from tcb will improve software correctness
+		- extensibility not hindered as new i/o devices can be added without modifying the kernel or spm
+## STOP
+- os including kernel
+- security kernel lives in ring 0
+	- provides memory management, process scheduling, interrupt management, auditing, and reference monitoring functions
+	- 10k lines of Pascal
+	- ring transitions controlled by 38 gates (apis)
+- **trusted software** - officially part of stop, but runs outside of ring 0
+	- software is trusted with *system security goals*
+		- e.g. process loader, database editor
+	- system policy management and use (auth services) also considered trusted software
+		- user services - interface to scomp for user
+		- trusted operation services - provide functions that enable sys admins to manage the system
+		- trusted maintenance functions - enable sys admins to modify system data
+		- trusted services for skip kernel interface
+	- 23 processes, 11k lines of c
+		- all interactions use a trusted path
+		- trusted path in modern os is secure attention sequence
+## SKIP
+- like a **system call interface** for *user processes*
+	- trusted operations on user-level objects
+	- still trusted to not violate mls requirements
+- skip library runs in user space, ring 3
+- hierarchical file system
+	- implemented outside of kernel, all file system operations are invoked by skip gate to ring 2
+	- manipulate objects at level of segment
+	- accessible through skip
+	- all non-kernel i/o is *unprivileged*
+## Evaluation
+- **applications of scomp**
+	- can be used by mls-trusted applications
+	- mail guard
+		- makes sure that secrets are not leaked in communications to less secret subjects
+		- obtains labeled communications
+		- has ad-hoc filters to prevent leakages
+	- scomp ideal platform because it is assured to enforce the mls requirements and execute the application without allowing malicious software to take control of its execution
+- **complete mediation**
+	- *correct?*
+		- all mediation is performed in hardware, so always performed on the correct system resource
+	- *comprehensive?*
+		- at the segment level
+		- all security-sensitive accesses mediated by hardware since all system resources are segments
+		- file system must be trusted to prevent unauthorized access to one process's file data by another process
+	- *verified?*
+		- hardware verification justifies complete mediation
+- **tamperproof**
+	- *protection from modification?*
+		- uses protection rings
+	- *protect tcb?*
+		- [[Enforcement|tcb]] runs in rings 0, 1, 2
+- **verifiable**
+	- *code?*
+		- performed verification on implementation with semi-automated methods
+			- formal top level specification for the kernel developed in the formal specification langauge SPECIAL
+			- formal top-level specification of the trusted software developed in gypsy
+			- formally describe the tcb in terms of exceptions, messages, effects
+		- this work led to standardized criteria and approaches for software assurance
+	- *policy?*
+		- mls is the security goal and is formally specified by blp
+		- integrity is more difficult, there is no formal analysis framework
+- scomp not used because of performance, practical utility, and maintenance complexity
