@@ -1,4 +1,4 @@
-#access_control #reference_monitor #access_control/acl #access_control/access_matrix #confinement 
+#access_control #reference_monitor #access_control/acl #access_control/access_matrix #confinement #access_control/models 
 ## Overview
 - review - [[Reference Monitor Concept|reference monitor components]]
 	- interface
@@ -63,3 +63,14 @@
 		- constraints like ddos are ad hoc
 	- **operating systems** - lots of heuristic algorithms to computationally hard problems, but very little end user configuration of policy
 		- policy configuration done by os distributors
+## List of Models
+- **discretionary access matrix** - unix, acl, various capability systems
+- **mandatory access matrix** - te, [[Role Based Access Control|rbac]], groups + attributes, parameterized
+- **plus transitions** - dte, [[SELinux|selinux]], java
+- **lattice access control models** - bell-lapadula, biba, denning
+- **predicate models** - asl, oasis, domain specific models, etc
+- **safety models** - take grant, schematic protection model, typed access matrix
+## Administration
+- **discretionary access control** - users, typically the object owner, can decide permission assignments
+- **mandatory access control** - system admin decides on permission assignments
+- **flexible administrative management** - access control models can be used to express admin privileges
