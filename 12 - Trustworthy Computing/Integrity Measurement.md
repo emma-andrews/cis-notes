@@ -1,0 +1,52 @@
+## Linux Integrity Measurement
+- **problem** - how can we verify the software environment of networked systems?
+- **solution** - extend tpm measurement architecture to measure system's runtime
+	- software stack
+- **other goals**
+	- load time integrity
+	- unobtrusive
+	- tamper-evident
+	- usability
+- **integrity measurement** - means used to determine the state of the host
+	- relies on measurement (e.g. hashed codes)
+		- hardware support emanates from the [[Trustworthy Computing|crtm]], secured on the host
+		- subsequent measured steps: bios, bootloader stage 1 and 2, os, drivers
+	- attestation of code is performed with tpm quote operation
+## IMA
+- system integrity depends on several components
+	- **executables** - programs, libraries, kernel modules
+	- **configuration files** - httpd.conf, /etc/shadow
+	- **unstructured input** - network data, keystrokes, basically everything else
+### Implementation
+- place **hooks** throughout linux kernel
+	- later added as an [[Linux Security Modules|lsm]] and then special lim hooks
+- extend **tpm pcr** at file load time, pcr = SHA1(file || pcr)
+- applications instrumented to **measure** inputs
+	- e.g. bash scripts, interpreters
+- verifying all events is difficult
+	- need known "good" values to *validate* measurements
+	- leverage os distribution definitions
+- has rootkit compromise analysis
+- **limitations**
+	- static **root of trust** for measurement (reboot)
+	- **coarse-grained** - measures entire system
+		- requires hundreds of integrity measurements just to boot
+		- every host is different
+		- [[Enforcement|tcb]] includes entire system
+	- **integrity measurements** are done at load time, not at run time
+		- [[Vulnerabilities|tocttou]] problem
+		- cannot detect any dynamic attacks
+		- no guarantee of execution
+## Dynamic Root of Trust for Measurement (DRTM)
+- aka **late launch**
+- involves both cpu and tpm v1.2
+- security properties similar to reboot, but without a reboot
+- removes many things from tcb
+	- bios, bootloader, dma-enabled devices
+	- long running os and applications if done right
+- when combined with **virtualization**
+	- virtual machine memory (vmm) can be measured (mvmm)
+		- potentially lengthy uptimes
+	- integrity of loaded code can be attested
+	- untrusted legacy os can coexist with trusted software
+- allows introduction of new, higher-assurance software without breaking existing systems
