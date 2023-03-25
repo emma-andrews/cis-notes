@@ -1,4 +1,4 @@
-#access_control #access_control/models #access_control/models/lattice
+#cis/access_control #cis/access_control/models #cis/access_control/models/lattice
 ## Lattice Models
 - **Hasse diagram** - represents security lattices
 	- represents a finite poset as a directed graph of its transitive reduction

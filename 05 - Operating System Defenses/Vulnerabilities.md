@@ -1,4 +1,4 @@
-#vulnerabilities/morris #vulnerabilities/confused_deputy #vulnerabilities/overflow #vulnerabilities/tocttou 
+#cis/vulnerabilities/morris #cis/vulnerabilities/confused_deputy #cis/vulnerabilities/overflow #cis/vulnerabilities/tocttou 
 ## Vulnerabilities in Commodity OSes
 - **privilege escalation** - function run by one subject that enables an attacker to gain *unauthorized privileges*
 - two views on vulnerabilities

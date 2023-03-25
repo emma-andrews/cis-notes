@@ -1,4 +1,4 @@
-#vulnerabilities/overflow #vulnerabilities/morris #vulnerabilities/stackguard 
+#cis/vulnerabilities/overflow #cis/vulnerabilities/morris #cis/vulnerabilities/stackguard 
 ## Attack Description
 - **buffer overflows** are very common
 	- [[Vulnerabilities|Morris worm]] was the first to exploit

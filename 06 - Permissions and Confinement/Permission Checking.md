@@ -1,4 +1,4 @@
-#access_control/unix #access_control/acl #permissions
+#cis/access_control/unix #cis/access_control/acl #cis/permissions
 ## Linux Permission Checking
 - **[[UNIX Access Control|permissions]]** checked when a pathname is specified in a system call for accessing a file or directory
 - **kernel process**

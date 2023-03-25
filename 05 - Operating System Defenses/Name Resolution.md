@@ -1,4 +1,4 @@
-#vulnerabilities/links #vulnerabilities/tocttou  
+#cis/vulnerabilities/links #cis/vulnerabilities/tocttou  
 ## Links - Name Resolution Attack
 - multiple names for a single **inode**
 - set a **link** overwriting a valid link to an invalid one

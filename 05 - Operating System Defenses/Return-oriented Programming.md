@@ -1,4 +1,4 @@
-#vulnerabilities/rop #vulnerabilities/stackguard #vulnerabilities/overflow 
+#cis/vulnerabilities/rop #cis/vulnerabilities/stackguard #cis/vulnerabilities/overflow 
 ## Basics
 - general approach to **control flow attacks**
 - demonstrates the two general steps of a control flow attack

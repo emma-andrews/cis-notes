@@ -1,4 +1,4 @@
-#confinement
+#cis/confinement
 ## Why do we need confinement?
 - **protection** - ensure another process cannot access or modify any of my data except those that I have *explicitly* granted access to
 - how can an external service be harmful?

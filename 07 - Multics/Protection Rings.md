@@ -1,4 +1,4 @@
- #multics #multics/protection_ring
+ #cis/multics #cis/multics/protection_ring
 ## Overview
 - **integrity** for [[Multics|multics]]
 - successively less-privileged domains

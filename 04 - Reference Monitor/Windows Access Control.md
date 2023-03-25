@@ -1,4 +1,4 @@
-#access_control/windows #access_control/acl 
+#cis/access_control/windows #cis/access_control/acl 
 ## Windows Access Control
 - access control on objects
 	- can define **arbitrary classes**

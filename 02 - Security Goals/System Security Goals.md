@@ -1,4 +1,4 @@
-#security_goals
+#cis/security_goals
 ## Goals
 - need to identify the problem
 	- how do we eliminate it?

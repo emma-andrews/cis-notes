@@ -1,3 +1,4 @@
+#cis/security_kernels 
 ## Overview
 - **gemini operating system (gemsos)** - similar system goals to [[SCOMP|scomp]]
 	- built for the "new" x86 processor

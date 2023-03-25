@@ -1,4 +1,4 @@
-#reference_monitor
+#cis/reference_monitor
 ## Reference Monitor
 - **purpose** - ensures enforcement of security goals
 	- *[[Mandatory Protection|mandatory protection state]]* defines goals

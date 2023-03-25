@@ -1,4 +1,4 @@
-#reference_monitor #lsm #enforcement/tcb #access_control/mps 
+#cis/reference_monitor #cis/lsm #cis/enforcement/tcb #cis/access_control/mps 
 ## Overview
 - **SELinux** - comprehensive *reference validation mechanism* aiming at [[Reference Monitor Concept|reference monitor]] guarantees
 - motivated by [[Security Kernels|security kernel]] design philosophy

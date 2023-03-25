@@ -1,4 +1,4 @@
-#multics #multics/protection_ring #multics/mls #reference_monitor 
+#cis/multics #cis/multics/protection_ring #cis/multics/mls #cis/reference_monitor 
 ## Security-Related Features
 - cpu traps user-mode i/o and privileged instructions
 - user login requries password

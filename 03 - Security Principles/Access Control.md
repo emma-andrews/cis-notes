@@ -1,4 +1,4 @@
-#access_control/access_matrix #access_control/protection_system #access_control/protection_state #access_control/privilege_attenuation
+#cis/access_control/access_matrix #cis/access_control/protection_system #cis/access_control/protection_state #cis/access_control/privilege_attenuation
 ## Authorization and Authentication
 - **authentication** - verifying someone or something's identity
 - **authorization** - deciding whether a subject can perform a requested operation on an object

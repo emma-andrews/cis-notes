@@ -1,4 +1,4 @@
-#multics #multics/mls #access_control/mps  
+#cis/multics #cis/multics/mls #cis/access_control/mps  
 ## Overview
 - **secrecy** for [[Multics|multics]]
 - **multilevel security system** - tags all objects and subjects with security tags

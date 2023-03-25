@@ -1,8 +1,8 @@
-#access_control #access_control/unix #access_control/access_matrix #vulnerabilities/confused_deputy 
+#cis/access_control #cis/access_control/unix #cis/access_control/access_matrix #cis/vulnerabilities/confused_deputy 
 ## UNIX Access Control
 - all objects are files
 - classical protection system
-	- limited [[cis/03 - Security Principles/Access Control|access matrix]]
+	- limited [[Access Control|access matrix]]
 	- discretionary protection state operations
 - practical model for end users
 	- involves some policy specification

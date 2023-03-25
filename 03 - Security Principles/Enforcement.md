@@ -1,4 +1,4 @@
-#enforcement/tcb
+#cis/enforcement/tcb
 ## Trusted Computing Base (TCB)
 - operating systems usually treat applications as blackboxes
 - operating systems controls flows among applications

@@ -1,3 +1,4 @@
+#cis/trustworthy_computing #cis/trustworthy_computing/integrity #cis/trustworthy_computing/late_launch  
 ## Linux Integrity Measurement
 - **problem** - how can we verify the software environment of networked systems?
 - **solution** - extend tpm measurement architecture to measure system's runtime

@@ -1,3 +1,4 @@
+#cis/security_kernels/scomp 
 ## Details
 - honeywell level 6 minicomputer enhanced with processor instructions
 	- bus connected units for cpus, i/o controllers, and memory

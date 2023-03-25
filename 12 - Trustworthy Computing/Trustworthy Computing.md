@@ -1,4 +1,4 @@
-#trustworthy_computing
+#cis/trustworthy_computing #cis/trustworthy_computing/secure_boot #cis/trustworthy_computing/auth_boot #cis/trustworthy_computing/tpm 
 ## Overview
 - computer is running a process
 - makes a request to the computer asking for some secret data tot process

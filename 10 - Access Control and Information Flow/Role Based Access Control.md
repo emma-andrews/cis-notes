@@ -1,4 +1,4 @@
-#access_control/rbac #access_control/mac #access_control 
+#cis/access_control/rbac #cis/access_control/mac #cis/access_control 
 ## Linux in 2000
 - **authorization** - discretionary access control
 - **discretionary access control (dac)** - allows users the ability to make policy decisions or assign security attributes
