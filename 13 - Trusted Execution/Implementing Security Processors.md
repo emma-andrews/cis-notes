@@ -1,4 +1,4 @@
-#cis/trustworthy_computing 
+#cis/trustworthy_computing [[Secure Processors]]
 ## External Modules
 - outside the main system on chip (soc)
 - **pros**
