@@ -1,0 +1,115 @@
+# Overview
+- **goals**
+	- identify operations that require privilege
+	- rewrite programs with multiple parts corresponding to different desired privilege levels
+	- reduce and minimize amount of code needed to run with special privileges
+- **provos approach** - monitor and slave
+	- *monitor* grants *slave* requests for any operations requiring privilege
+
+# UNIX Mechanisms
+- user and group id changes for unprivileged children
+- ipc for allowing slaves and monitors to *interact*
+	- socket-pair system call
+	- shared memory
+- [[Vulnerabilities|chroot jail]] and subsequent privilege revocation
+- capability transfer through file descriptor passing
+- processes can *change identity*
+	- service changing from pre-auth to post-auth state
+		- allow child to have privileges of authenticated user
+		- terminate child and create new process with desired uid and gid
+		- messy
+	- process state carried over by exporting structures through *serialized data marshalling*
+		- dynamic structures pose a problem, solved with *shared memory synchronization*
+			- problem bc unknown size until runtime
+
+# Automating
+- provos did privilege separation manually
+	- 25k lines of code
+	- 46 message types with strict rules for allowing them
+- post-provos - automated approaches, such as PrivTrans
+	- automatically try to *infer privileged data* and operations given annotations
+	- source to source transformation
+- **isolation domains** to reduce privilege
+	- e.g. [[Modern Virtual Machine Systems|proxos]]
+	- typically only for subset of system calls
+	- need to generalize if possible to support more
+- **privtrans** - determine which operations are privileged by programmer annotations on variables and functions
+
+# Assurance
+- **assurance problem** - issue of verifying system satisfies [[Reference Monitor Concept]]
+	- commercial systems not designed to satisfy it
+- **assurance** - set of evaluations aiming to show that a system provides a *correct security function*
+	- motivated by work on [[Security Kernels]]
+		- implement specific security policy
+		- design a verifiable protection behavior of system as a whole
+		- implementation must be shown to be faithful to system's design
+	- develop distinct sets of requirements to be fulfilled for such an approach
+- formally, first "assured" system was [[SCOMP]]
+- **complete mediation**
+	- each *structure member* access to a security-sensitive object must be mediated (*domination*)
+		- find objects that enable an *information flow* between subjects
+	- mediation must authorize all dominated operations
+	- uncommon accesses may require additional mediation
+		- consistent across code
+- **tamperproofing**
+	- start with known, good code and data
+		- *integrity verification*
+	- each info flow to kernel or [[Enforcement|tcb]] must be from *trusted entity*
+		- e.g. [[Lattice Access Control Models|biba]]
+		- or, each info flow from an *untrusted entity* to kernel or tcb must be filtered
+			- attack surface
+	- *filters* must be acceptable
+- **verification**
+	- code must correctly implement *security-sensitive functions*
+	- *policy* must correctly describe data security requirements
+		- all authorized info flows, including tamperproofing and user/app data
+- validate complete mediation, tamperproofing, and verification in *design*
+- verify mapping to **implementation** for all 3
+
+## Assurance Criteria
+- **criteria goals**
+	- security policy
+	- mechanisms contributing to effective enforcement of policy
+	- assurance that mechanisms are functioning
+- **rainbow series** - series of docs on how to build secure systems
+- **orange book** - trusted computer system evaluation criteria
+	- defined 6 classes of secure systems
+		- functions required by those classes
+		- requirements for verifying implementation meets class
+	- requirements - access control, mechanism/policy, authentication, audit, etc
+- **orange book classes**
+	- *c1  and c2* - discretionary protection
+		- authentication, audit for discretionary access
+		- testing and documentation
+		- c2 is most common class for commercial products
+	- *b1, b2, and b3* - labeled security protection
+		- [[Multilevel Security]] (blp)
+		- b1 - mls on some objects
+		- b2 - mls on all objects
+			- introduces [[Confinement|covert channel]] protections and config management
+		- b3 - software engineering documentation
+	- *a1* - verified protection
+		- requires correspondence between code and formal model
+- **common criteria** - set of evaluation techniques to vet technologies
+	- evaluation information security
+	- tell what technologies are good and bad, for the most part
+	- allows users to know if service meets advertised security
+	- *separate* - protection profile and assurance level
+	- **protection profile** - set of requirements for class of products of this type
+		- e.g. firewalls
+	- **security target** - definition of what and how the *target of evaluation (toe)* meets a set of security requirements
+	- **eal levels**
+		- *eal1* - functionally tested, breathing
+		- *eal2* - structurally tested, high level design
+		- *eal3* - methodically tested and checked, high level design motivates testing
+		- *eal4* - methodically designed, tested, and reviewed, low-level design and vulnerability analysis
+		- *eal5* - semi-formally designed and tested, rigorous development using (semi)formal models
+		- *eal6* - semi-formally verified design and tested, low level design
+		- *eal7* - formally verified design and tested
+	- linux is assured to *eal4* for controlled access protection profile
+		- discretionary access control with a low level system design
+	- [[Linux Security Modules]] and [[SELinux]] - *eal4* for labeled security protection profile
+	- challenges with linux
+		- upstream all code, assuring a mainline linux kernel
+		- enable applications
+		- package into distribution
