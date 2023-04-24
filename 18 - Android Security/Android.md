@@ -1,0 +1,11 @@
+# Android Overview
+- **android** - used for phones and tablets, pretty much anything that isnt a traditional pc
+	- not stock linux, but based on recent-ish versions of it (v5.0.3)
+		- for ref, latest stable = v6.2.12, several longterm support versions
+	- kernel heavily modified by oems and chip manufacturers
+- **androidisms** - set of new features to support android
+	- e.g. low memory killer, anon shared mem
+	- google's long term goal is to run android with stock linux kernel
+		- linux community - but it might require a static abi
+- **middleware** - open source vm implementation optimized for mobile devices
+- ****
