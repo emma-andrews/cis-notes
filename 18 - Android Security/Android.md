@@ -8,4 +8,139 @@
 	- google's long term goal is to run android with stock linux kernel
 		- linux community - but it might require a static abi
 - **middleware** - open source vm implementation optimized for mobile devices
-- ****
+	- different instruction sets
+	- non-standard object files
+	- class files, but dalvik executable files
+		- packaged inside system java libraries or android apps
+		- system libraries and preinstalled apps have device-dependent optimizations
+		- user installed apps similarly optimized flow of compilation from java to dex with dalvik
+- **processes** - system designated each app a linux uid and is unknown to the app itself
+	- sys sets permissions for all files in app
+	- only uid assigned to app can access files
+	- each process has its own vm
+		- code runs in isolation from other apps
+	- every app runs its own process
+		- android system starts process when app's components need to be executed
+		- shuts down process when no longer needed or if sys needs to recover mem for other apps
+	- principle of *least privilege*
+		- each app by default can only access components it required to do its work and no more
+		- sharing is possible
+- **software stack**
+	- app middleware sits on top of linux kernel
+	- sys apps > app middleware > linux kernel
+	- in app middleware, java api framework > native c/c++ libs > android runtime > hal
+	- linux kernel is drivers and power management
+
+# Android Apps
+- no main function
+- user interacts with app via gui
+- no command line interface
+- many apis are event-driven
+	- register a **listener** x
+	- x's *callback* is invoked later on
+
+## Main Components
+- apps are built as a combo of **components**
+	- *main types* - activity, service, broadcast receiver, content provider
+	- each has own life cycle
+- **activity** - entry point for an app interacting with user
+	- represents single screen with ui
+	- can be many activities where each one defines a ui
+		- choses resulting screen when app starts
+	- if allowed by app, external app can start activities
+- **service** - meant to perform an action in background for some period of time, regardless of what user is doing in foreground
+	- no ui
+	- e.g. music player service
+- **broadcast receiver** - respond to system wide events
+	- well-defined entry point
+	- sys can deliver broadcast receiver events even to apps not currently running
+	- e.g. battery charging, sms msg received
+- **content provider** - manages a shared set of app data
+	- high level api to access data so that other apps and services can query and interact with it
+	- abstracts away storing mechanism
+	- most often based on sqlite db
+- **intents** - means by which communication occurs between components
+	- android-defined objects encode an "intent" to allow for this communication
+	- *use cases*
+		- notation - a.x refers to app a's component x
+		- a.x wants to start a.y
+			- e.g. go to next activity
+		- a.x wants to send data to b.z
+		- since each component has its own life cycle, a.y may already be started
+	- **explicit** - explicitly specifies which component it wants to talk to
+		- specifies package name/component
+	- **implicit** - describes type of action to perform
+	- **filters** - mechanisms for apps to declare their ability to handle intents
+		- when an app sends an implicit intent, sys knows it can count on x to handle it
+
+## Apps continuation
+- **isolation** - apps run in separate processes
+	- apps being in *sandbox* means that they cannot talk to each other or do anything security-sensitive
+		- sandbox has been progressively more restrictive
+
+# Binder
+- traditional oses have user space vs kernel space
+	- *user space* - user processes and apps live, cannot do much by themselves
+	- *kernel space* - os lives, mostly unfettered access to all resources
+	- with android, need to get out of app's sandbox to a privileged service, which are in two locations
+		- solution is binder
+- **binder** - allows for remote procedure call (rpc) and inter-process communication (ipc)
+- **binder rpc** - app runs as non-privileged process and calls binder proxy which lives in user space
+	- proxy talks to binder driver in kernel space
+	- driver calls binder stub in user space and runs as a privileged process/service
+- **binder ipc mechanism** - apps talk to each other through high level api of intents
+	- under the hood its binder calls
+	- app a run as non-privileged process, starts new intent b.x activity
+	- calls binder driver, it talks to the activity manager which is run as a privileged process/service
+	- returns to binder driver, creates activity b.x, run as non-privileged process
+- **security** - app cannot do all these things
+	- has a private folder
+	- can start other apps
+	- can show things on screen when app is in foreground
+	- cannot open internet connection
+	- cannot get current location
+	- cannot write on external storage etc etc
+
+# Android Permission System
+- long list of **permissions** defined by android framework
+- each "protects" security-sensitive capabilities
+	- ability to "do" something sensitive
+		- e.g. open internet connection, send sms
+	- ability to "access" sensitive information
+		- e.g. location, user contacts
+- **external storage**
+	- each app has access to a private directory
+	- device offers an external storage
+	- part of file system that apps can use to share files
+		- used to be a removable sd card
+- **receive boot completed**
+	- when sys boots, it broadcasts an intent with action boot completed
+	- an app can declare an *intent filter* for this intent so that it can automatically start at boot
+	- useful to gain *persistence/survive* reboots
+- **security building blocks** - device hardware, android os/linux kernel, google security services
+
+# Booting
+- phone's soc turns on and powers up different subsystems
+- boot cpu needs to start executing instructions
+- instructions and referenced data located in non-volatile storage, device firmware update (usb), rom
+- **problem** - how do we *trust* these instructions? e.g. what is our root of trust?
+
+## Secure Boot
+- system boots in **stages**
+- each stage loads and verifies the next one
+- establishes a **root of trust via chaining**
+- **boot rom** - cryptographically verifies sbl via key stored in rom
+- **secondary bootloader (sbl)** - initializes dram from sram and mmu
+	- done because mask rom is expensive in both area and validation
+	- cpu needs to quickly start executing code from non-volatile storage
+	- dram and sram are volatile so sbl takes care of it
+	- once most critical subsystems are initialized, aboot is executed
+- **android boot (aboot)** - primary bootloader with tons of functionality
+	- *unlock bootloader* - aboot will not enfore chain of trust over subsequent stages
+		- how you can install custom things
+	- aboot itself cannot be changed
+		- you can but sbl won't load it and most likely you'll brick your device
+	- same for other partitions (boot, system)
+		- you can change them, but if aboot is locked it will refuse to load them
+	- not all devices allow bootloaders to be unlocked
+	- 
