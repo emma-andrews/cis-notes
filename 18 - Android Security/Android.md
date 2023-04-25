@@ -143,4 +143,76 @@
 	- same for other partitions (boot, system)
 		- you can change them, but if aboot is locked it will refuse to load them
 	- not all devices allow bootloaders to be unlocked
-	- 
+	- by default, you cannot unlock bootloader
+		- change this through dev options setting to allow oem unlocking
+- **device state** - indicates how freely software can be flashed to a device and whether verification is enforced
+	- possible states - *locked* and *unlocked*
+	- *locked devices* boot only if the os is properly signed by root of trust
+- **rollback protection** - prevents installing older and vulnerable version of android
+	- fuses physically blown if tried
+
+# Partitions
+- **boot** - contains a kernel image
+	- *ramdisk* -  small partition, /init and other config files, mount other partitions
+- **system** - contains everything mounted at /system
+	- android framework, system apps
+	- read only and enforced via *dm-verity*
+		- *dmd-verity* - kernel feature to provide transparent integrity checking of block devices
+			- maintains cryptographic hash tree (merkle tree)
+			- *merkle/hash tree* - recursively hash data until you reach a single hash, which then represents the root
+	- helps prevent attacker's persistence on device
+- **vendor** - binary that is not part of aosp
+- **userdata** - contains everything mounted at /data and 3rd party apps
+- **radio** - 'radio' image, super sensitive and run on its own processor
+- **recovery** - like boot but for recovery mode
+
+# Application Sandbox and its Defenses
+- each app is **isolated** from each other
+	- each app is assigned to a different user
+- **sandbox** in the kernel
+	- native code cannot bypass sandbox to other areas
+	- to bypass it, attacker needs to *compromise linux*
+- **defense**
+	- multiple layers of security controls are placed throughout sys
+	- prevents single vulnerabilities from leading to compromise of os or other apps
+	- *all in all this is redundancy*
+- [[SELinux]] appears as a domain, a label identifying a process
+	- all processes labeled with same domain are treated equal
+	- in android 5 (android 13 is latest version)(i doubt we need to know version diffs below but ya know, including just in case)
+		- mac separation between sys and apps
+		- run in *enforcing mode* for first time
+	- in android 6
+		- policy more restrictive, tighter domains
+		- ioctl filtering to minimize exposed services
+		- extremely limited /proc access
+		- selinux sandbox to isolate across per-physical-user boundaries
+	- in android 7
+		- broke up monolithic mediaserver stack into smaller processes
+			- before, if you exploit component x, you can control component y
+		- compartmentalization
+	- in android 8
+		- all apps run with a filter that limits syscalls that apps can use
+			- attack surface reduction
+	- in android 9
+		- each app has individual selinux context
+		- prevents apps from making their data world writable
+	- **all in all**, selinux policies and android are in constant evolution
+		- things that work now may not work in the future
+		- this shit also 4 versions behind current day so who knows what today's android does
+- **google security services** - provides security services (wow who would have guessed)
+	- bug reporting and triaging
+	- process types
+	- local vs remote
+	- severity - critical, high, moderate, low
+
+# Project Treble
+- android's **core problems** are
+	- fragmentation
+	- many devices dont get updates
+	- release update cycle is slow, especially for non-google devices
+- all boils down to **one core problem**
+	- previously no clear interface between android os framework and vendor implementation
+	- when android os is updated, vendors need to rework their implementations
+		- introduces delays
+- **project treble** - android v8+, defines clear vendor interface where android os framework can update without the vendor implementation also having to change
+- fun fact each android major version has an internal code name related to a dessert
