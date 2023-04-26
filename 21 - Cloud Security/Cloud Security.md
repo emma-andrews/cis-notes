@@ -1,0 +1,164 @@
+# Overview
+- **cloud computing** - computing technology in which data and/or computation are outsourced to a massive scale multi user infrastructure managed by a third party
+	- includes software as a service (saas), platform as a service (paas), infrastructure as a service (iaas)
+	- addresses *scaling* and *management* issues
+- **scaling challenge** - around 1995 explosion in web and e-commerce, massive jump in users in just a 1 year span
+	- **solutions**
+		- *big iron* - pre 1995, big expensive computers
+			- pros - easy to manage, easy to program, had a simple failure mode
+			- cons - expensive, single point of failure, no *incremental stability*
+		- *cluster building* - leveraging many interconnected small, cheap, general purpose machines for scalability and reliability
+
+# Clusters
+- **cluster** of small computers interconnected
+- became a **manageability challenge**
+	- hard to manage and program large clusters
+		- write and debug scalable distributed programs
+		- make services reliable
+		- architect network infrastructure and provision for peak usage while administering large number of computers
+	- every company built their own software
+		- equivalent to building an os from scratch
+- **valuable commodities** - giant scale clusters with enormous *excess capacity*
+	- everyone provisioned for peak
+	- expertise for managing and operating clusters at low cost
+	- complex software to help program and manage clusters
+- **monetize** excess capacity
+	- aws sells resources, expertise, and access to cloud primitives in a *pay for what you use model*
+	- google has google apps for your domain, web hosting infrastructure
+	- microsoft azure
+- **precedents** - comparing utility/grid computing vs cloud
+	- *utility/grid computing* - goal to make computing a utility just like water, power
+	- *clouds* - difference is **elasticity**
+
+# Why Use Cloud Computing
+- **user perspective** - pay only for what you need so cheap service
+	- *elasticity* - grow and shrink as desired
+	- problem is *trust*
+- **provider perspective** - profit
+	- hardware cheaper in bulk and if you have lots of utilization that is good
+	- build on what you already have
+	- opportunity to be best in breed for solutions and platforms if you are the one everyone uses
+	- do have to pay for and maintain data centers
+- **new opportunities**
+	- mobile apps needed server backends, and cloud was good for this
+	- parallelism and huge computing needs
+	- analytics
+	- extend desktop
+- **economics** - if cost of renting cloud is cheaper than setting up a data center, then use the cloud
+	- cost of data center factors in utilization
+	- without enough sustaining customers, keeping own servers becomes risky
+		- too few and customers leave
+		- too many and maintenance is pricey
+
+# Compare to Past
+- [[Multics]]
+	- permission based protection
+	- least privilege philosophy
+	- usability
+	- cons - acls and weak encryption of pw file
+- [[Virtual Machine Basics|vmms]]
+	- trusting vmm more feasible than trusting os
+		- smaller attack surface, limited functionality, smaller
+		- but is this still true?
+	- **guest os** - same degree of *multiprogramming* as native os
+	- type 1 vs type 2 hypervisor changes attack surface considerably
+
+# Pros/Cons
+- **availability of service**
+	- if cloud goes down users suffer
+	- cloud providers are pretty good about not failing though
+	- help prevent ddos extortion by scaling up quickly and for cheaper than the demands
+- **data lock in**
+	- user cannot get data from cloud
+	- can charge more for better apis and services
+- **data confidentiality and auditability**
+	- users are concerned about their data
+	- government rules in place to regulate this e.g. gdpr
+	- no fundamental obstacles to making cloud as secure as in house environment
+		- is this really true though
+	- *fate sharing* - cloud provider and customer work closely together towards a common goal
+	- can data center servers be secure systems?
+
+# Shared Resources
+- **shared resource multiplexing** - critical to cloud computing mode
+- **multi-tenant servers** - host multiple vm instances on a single physical server
+	- all is well if the vms are *isolated*, but are they really
+- **multi-tenant placement** - can you use info on where multi tenant vms are located if you can obtain it?
+
+# Amazon EC2
+- runs on xen
+- xen routes packets from guests to dom0
+- instance launched on ec2 stays within that network for its lifetime
+- keys to where an instance will run - region, availability zone, instance type
+- **hierarchy** - divided into 3 layers
+	- *regions* - us, europe, etc
+	- *availability zones* - separate power and network connectivity, independent failure modes
+	- *instance types* - combination of processing, memory, storage
+		- micro to xl
+
+# Cloud Cartography
+- what goes where and how do we know that
+- test **instance liveness** using nmap, hping, wget
+	- tcp connect probes on ports 80, 443
+	- tcp syn traceroutes
+	- wget to fetch web page data
+- get around amazon aup reprobing by using dns query to get ip addresses and probe externally
+- **hypothesis** - different availability and instance zones correspond to different ip address ranges
+	- could infer instance ip address through dns
+	- if this works, map ec2 to determine instance and availability zone of target to become co resident
+- **zone mapping** - internal address space was partitioned between availability zones
+	- possible reason - zones exist to be independent in case of failures
+- **instance mapping** - no ip address observed to map to more than one instance type
+	- ec2 maps ip ranges within a zone to each instance type, independent of particular account
+- **co-residence** 
+	- hypothesis - instances are likely co-resident if they have
+		- matching dom0 ip address
+		- small packet round trip times
+		- numerically close internal ip addresses
+	- correctness of these checks was verified with a cross vm, hard disk covert channel
+	- resulted in false positive rate of 0% for dom0 ip co-residence check
+	- *mitigate* - prevent dom0 from responding to traceroute
+		- randomly assign internal ip addresses
+		- vlans to isolate accounts
+		- side channels can still be used to verify co-residence
+	- **exploiting placement** - single account with n instances wil likely be placed on n machines and exhibit placement locality
+		- load balancing in algorithm correlates machines instance density and likelihood of placement
+		- test - brute force running of targets, big factor is sequential locality
+		- instance flooding to force placement - unique placements level off so list of potential hosts becomes easily enumerable
+	- **results** - achieved co-residence in 2 rounds of 20 instance probes from one account to a victim
+		- achieved 3 way co-residence
+		- does not work if target put on a dense machine, but you could knock it to a different server
+- what can you do after achieving co-residence?
+	- could possibly steal crypto keys but very difficult to do so
+		- core migration
+		- coarse scheduling algorithms
+		- double indirection of memory addresses
+		- unknown load from other machines
+		- lack of hyperthreading
+	- can vms leak info?
+		- any machine resources multiplexed between attacker and target forms potentially useful channel
+		- can cause performance degredation attack or dos
+		- costly and annoying, but less important in a scalable environment
+	- cache side channel
+		- attack by determining load on target
+		- measure cpu utilization, prime + probe l2
+			- read buf of bytes at s byte offsets to ensure buf is cached
+			- busy loop on cpu until large jump in cycle counter
+				- indicates pre-empted image for another vm
+			- measure type taken to read buffer again
+		- creates load sample that correlates cache with other users on machine
+	- cache covert channel
+		- if cross vm communication is forbidden, partition cache into even and odd sets
+		- read 0 for even, 1 for odd
+		- selective load cpu when controlling vm to allow signal to be read by other vm
+		- differential encoding - signal is difference between even and odd sets
+		- confirms co-residence - can be used against we server
+			- e.g. measure get requests
+	- other attacks
+		- estimate traffic rates by looking at cache activity
+		- keystroke timing through load measurement
+			- maybe possible in a low noise environment
+			- probably not actually deployable
+- multi tenancy and statistical multiplexing always creates an opportunity for side channels and atacks
+	- are protection or security issues considered?
+	- what to do to prove either guarantee?

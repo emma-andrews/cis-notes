@@ -1,3 +1,5 @@
+this slide deck is 176 pages, not going to finish it
+
 # Monolithic Kernels vs. Microkernels
 - **microkernel** - flexible, minimal platform
 	- mechanisms instead of policies
